@@ -1,0 +1,556 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+         http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="placeholderConfig"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="WEB-INF/OpenLibrary-servlet.properties" ></property>
+	</bean>
+
+	<!-- URL mapping -->
+
+	<bean id="urlMap"
+		class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="urlMap">
+			<props>
+				<prop key="/index.jsp">homeController</prop>
+				<prop key="/login.htm">loginController</prop>
+				<prop key="/logout.htm">logoutController</prop>
+				<prop key="/createaccount.htm">createAccountController</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="urlMobileMapAuthenticate"
+		class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="interceptors">
+			<list>
+				<ref bean="androidRequestInterceptor" />
+			</list>
+		</property>
+		<property name="urlMap">
+			<props>
+				<prop key="/booksowned.htm">booksOwnedController</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="androidRequestInterceptor" class="com.openlibrary.controllers.AndroidRequestInterceptor"
+		init-method="init">
+		<property name="mobileUserAgents">
+			<list>
+				<value>.*(Android).*</value>
+				<value>.*(Apache).*</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="urlMapAuthenticate"
+		class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="interceptors">
+			<list>
+				<ref bean="httpRequestInterceptor" />
+			</list>
+		</property>
+		<property name="urlMap">
+			<props>
+				<prop key="/booklist.htm">bookListController</prop>
+				<prop key="/addbook.htm">addBookController</prop>
+				<prop key="/addbookowned.htm">addBooksOwnedController</prop>
+				<prop key="/addbookread.htm">addBooksReadController</prop>
+				<prop key="/addbookwanted.htm">addBooksWantedController</prop>
+				<prop key="/booksread.htm">booksReadController</prop>
+				<prop key="/bookswanted.htm">booksWantedController</prop>
+				<prop key="/administration.htm">approveController</prop>
+				<prop key="/reviews.htm">reviewListController</prop>
+				<prop key="/addreview.htm">addReviewController</prop>
+				<prop key="/editprofile.htm">editProfileController</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="httpRequestInterceptor" class="com.openlibrary.controllers.HttpRequestInterceptor">
+		<property name="signInPage">
+			<value>login.htm</value>
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+	</bean>
+	
+	<!-- Controllers -->
+	<bean id="urlFilenameController"
+		class="org.springframework.web.servlet.mvc.UrlFilenameViewController" />
+		
+	
+
+	<bean name="bookListController" class="com.openlibrary.controllers.BookListController">
+		<property name="bookManager">
+			<ref bean="bookManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="successView">
+			<value>booklist</value>
+		</property>
+	</bean>
+	
+	<bean name="reviewListController" class="com.openlibrary.controllers.ReviewListController">
+		<property name="reviewManager">
+			<ref bean="reviewManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="successView">
+			<value>reviews</value>
+		</property>
+	</bean>
+	
+	<bean name="booksOwnedController" class="com.openlibrary.controllers.BooksOwnedController">
+		<property name="bookManager">
+			<ref bean="bookManager" />
+		</property>
+		<property name="booksOwnedManager">
+			<ref bean="booksOwnedManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="successView">
+			<value>booksowned</value>
+		</property>
+	</bean>
+	
+	<bean name="booksReadController" class="com.openlibrary.controllers.BooksReadController">
+		<property name="bookManager">
+			<ref bean="bookManager" />
+		</property>
+		<property name="booksReadManager">
+			<ref bean="booksReadManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="successView">
+			<value>booksread</value>
+		</property>
+	</bean>
+	
+	<bean name="booksWantedController" class="com.openlibrary.controllers.BooksWantedController">
+		<property name="bookManager">
+			<ref bean="bookManager" />
+		</property>
+		<property name="booksWantedManager">
+			<ref bean="booksWantedManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="successView">
+			<value>bookswanted</value>
+		</property>
+	</bean>
+	
+	<bean name="addBookController" class="com.openlibrary.controllers.AddBookController">
+		<property name="commandClass">
+			<value>com.openlibrary.domain.Book</value>
+		</property>
+		<property name="bookManager">
+			<ref bean="bookManager" />
+		</property>
+		<property name="booksOwnedManager">
+			<ref bean="booksOwnedManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="formView">
+			<value>addbook</value>
+		</property>
+		<property name="successView">
+			<value>redirect:booklist.htm</value>
+		</property>
+		
+	</bean>
+	
+	<bean name="addReviewController" class="com.openlibrary.controllers.WriteReviewController">
+		<property name="commandClass">
+			<value>com.openlibrary.domain.Review</value>
+		</property>
+		<property name="bookManager">
+			<ref bean="bookManager" />
+		</property>
+		<property name="reviewManager">
+			<ref bean="reviewManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="formView">
+			<value>addreview</value>
+		</property>
+		<property name="successView">
+			<value>redirect:reviews.htm</value>
+		</property>
+		
+	</bean>
+	
+	<bean name="addBooksOwnedController" class="com.openlibrary.controllers.AddBooksOwnedController">
+		<property name="commandClass">
+			<value>com.openlibrary.domain.BooksOwned</value>
+		</property>
+		<property name="bookManager">
+			<ref bean="bookManager" />
+		</property>
+		<property name="booksOwnedManager">
+			<ref bean="booksOwnedManager" />
+		</property>
+		<property name="bookConditionManager">
+			<ref bean="bookConditionManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="formView">
+			<value>addbookowned</value>
+		</property>
+		<property name="successView">
+			<value>redirect:booksowned.htm</value>
+		</property>
+		
+	</bean>
+	
+	<bean name="addBooksReadController" class="com.openlibrary.controllers.AddBooksReadController">
+		<property name="commandClass">
+			<value>com.openlibrary.domain.BooksRead</value>
+		</property>
+		<property name="bookManager">
+			<ref bean="bookManager" />
+		</property>
+		<property name="booksReadManager">
+			<ref bean="booksReadManager" />
+		</property>
+		<property name="reviewManager">
+			<ref bean="reviewManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="formView">
+			<value>addbookread</value>
+		</property>
+		<property name="successView">
+			<value>redirect:booksread.htm</value>
+		</property>
+		
+	</bean>
+	
+	<bean name="addBooksWantedController" class="com.openlibrary.controllers.AddBooksWantedController">
+		<property name="commandClass">
+			<value>com.openlibrary.domain.BooksWanted</value>
+		</property>
+		<property name="bookManager">
+			<ref bean="bookManager" />
+		</property>
+		<property name="booksWantedManager">
+			<ref bean="booksWantedManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="formView">
+			<value>addbookwanted</value>
+		</property>
+		<property name="successView">
+			<value>redirect:bookswanted.htm</value>
+		</property>
+		
+	</bean>
+	
+	<bean name="createAccountController" class="com.openlibrary.controllers.CreateAccountController">
+		<property name="commandClass">
+			<value>com.openlibrary.domain.User</value>
+		</property>
+		<property name="userManager">
+			<ref bean="userManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="formView">
+			<value>createaccount</value>
+		</property>
+		<property name="successView">
+			<value>redirect:index.jsp</value>
+		</property>
+		
+	</bean>
+	
+	<bean name="editProfileController" class="com.openlibrary.controllers.EditProfileController">
+		<property name="commandClass">
+			<value>com.openlibrary.domain.User</value>
+		</property>
+		<property name="userManager">
+			<ref bean="userManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="formView">
+			<value>editprofile</value>
+		</property>
+		<property name="successView">
+			<value>redirect:index.jsp</value>
+		</property>
+		
+	</bean>
+	
+	<bean name="loginController" class="com.openlibrary.controllers.LoginController">
+		<property name="commandClass">
+			<value>com.openlibrary.domain.User</value>
+		</property>
+		<property name="formView">
+			<value>login</value>
+		</property>
+		<property name="successView">
+			<value>redirect:index.jsp</value>
+		</property>
+		<property name="userManager">
+			<ref bean="userManager" />
+		</property>
+		<property name="validator">
+			<ref bean="loginValidator" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+	</bean>
+	
+	<bean name="homeController" class="com.openlibrary.controllers.LoginController">
+		<property name="commandClass">
+			<value>com.openlibrary.domain.User</value>
+		</property>
+		<property name="formView">
+			<value>index</value>
+		</property>
+		<property name="successView">
+			<value>redirect:index.jsp</value>
+		</property>
+		<property name="userManager">
+			<ref bean="userManager" />
+		</property>
+		<property name="validator">
+			<ref bean="loginValidator" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+	</bean>
+	
+	<bean name="logoutController" class="com.openlibrary.controllers.LogoutController">
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="successView">
+			<value>redirect:login.htm</value>
+		</property>
+	</bean>
+	
+	<bean name="approveController" class="com.openlibrary.controllers.ApproveController">
+		<property name="sessionForm">
+			<value>true</value>
+		</property>
+		<property name="commandClass">
+			<value>com.openlibrary.domain.BookList</value>
+		</property>
+		<property name="bookManager">
+			<ref bean="bookManager" />
+		</property>
+		<property name="applicationSecurityManager">
+			<ref bean="applicationSecurityManager" />
+		</property>
+		<property name="approvalMessage">
+			<ref bean="approvalEmailMessage" />
+		</property>
+		<property name="disapprovalMessage">
+			<ref bean="disapprovalEmailMessage" />
+		</property>
+		<property name="mailSender">
+			<ref bean="mailSender" />
+		</property>
+		<property name="validator">
+			<ref bean="approveValidator" />
+		</property>
+		<property name="formView">
+			<value>administration</value>
+		</property>
+		<property name="successView">
+			<value>redirect:administration.htm</value>
+		</property>
+	</bean>
+
+	<!-- Validators -->
+	<bean id="approveValidator" class="com.openlibrary.controllers.ApproveValidator" />
+	<bean id="loginValidator" class="com.openlibrary.controllers.LoginValidator" />
+	
+	<!-- Model classes -->
+	<bean id="bookManager" class="com.openlibrary.managers.BookManager" />
+	<bean id="booksOwnedManager" class="com.openlibrary.managers.BooksOwnedManager" />
+	<bean id="booksReadManager" class="com.openlibrary.managers.BooksReadManager" />
+	<bean id="booksWantedManager" class="com.openlibrary.managers.BooksWantedManager" />
+	<bean id="bookConditionManager" class="com.openlibrary.managers.BookConditionManager" />
+	<bean id="reviewManager" class="com.openlibrary.managers.ReviewManager" />
+	<bean id="userManager" class="com.openlibrary.managers.UserManager" />
+	
+
+	<!-- Utility classes -->
+	<bean id="applicationSecurityManager" class="com.openlibrary.util.ApplicationSecurityManager" />
+	<!-- View Resolver -->
+	<bean id="ViewContentResolver"
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="mediaTypes">
+			<map>
+				<entry key="html" value="text/html" />
+				<entry key="xml" value="text/xml" />
+				<entry key="json" value="application/json" />
+			</map>
+		</property>
+		<property name="viewResolvers">
+			<list>
+				<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+					<property name="viewClass">
+						<value>org.springframework.web.servlet.view.JstlView</value>
+					</property>
+					<property name="prefix">
+						<value>/WEB-INF/jsp/</value>
+					</property>
+					<property name="suffix">
+						<value>.jsp</value>
+					</property>
+				</bean>
+				<bean id="xmlViewResolver"
+							class="org.springframework.web.servlet.view.xslt.XsltViewResolver">
+							<property name="order" value="0" />
+							<property name="prefix" value="/WEB-INF/xsl/" />
+							<property name="suffix" value=".xsl" />					
+							<property name="viewNames">
+								<list>
+									<value>*-mobile</value>
+								</list>
+							</property>
+				</bean>
+			</list>
+		</property>
+		<property name="defaultViews">
+			<list>
+				<bean
+					class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">
+					<property name="prefixJson" value="true" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<!-- Spring mail support -->
+	
+	<bean id="mailSender"
+		class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="nova.edu" />
+<!--		<property name="username" value="myuserid" />-->
+<!--		<property name="password" value="mypassword" />-->
+	</bean>
+	<bean id="userReminderMessage" class="org.springframework.mail.SimpleMailMessage">
+		<property name="from" value="valadez@nova.edu" />
+		<property name="subject" value="OpenLibrary Weekly Update" />
+		<property name="text"
+			value="A book that you want to read has become available!" />
+	</bean>
+	<bean id="managerReminderMessage" class="org.springframework.mail.SimpleMailMessage">
+		<property name="from" value="valadez@nova.edu" />
+		<property name="subject" value="Books needing approval!" />
+		<property name="text"
+			value="There are books waiting to be approved!" />
+	</bean>
+	<bean id="approvalEmailMessage" class="org.springframework.mail.SimpleMailMessage">
+		<property name="to" value="administrator@me.com" />
+		<property name="subject" value="Book Approved" />
+		<property name="text" value="Book is approved.  Regards." />
+	</bean>
+	<bean id="disapprovalEmailMessage" class="org.springframework.mail.SimpleMailMessage">
+		<property name="subject" value="Book Disapproved" />
+		<property name="text"
+			value="Book is disapproved, please correct information.  Regards." />
+	</bean>
+	<bean id="reminderEmail" class="com.openlibrary.job.ReminderEmail">
+		<property name="booksOwnedManager">
+			<ref bean="booksOwnedManager" />
+		</property>
+		<property name="booksWantedManager">
+			<ref bean="booksWantedManager" />
+		</property>
+		<property name="userManager">
+			<ref bean="userManager" />
+		</property>
+		<property name="mailSender">
+			<ref bean="mailSender" />
+		</property>
+		<property name="userReminderMessage">
+			<ref bean="userReminderMessage" />
+		</property>
+	</bean>
+	
+	<bean id="managerEmail" class="com.openlibrary.job.ManagerEmail">
+		<property name="bookManager">
+			<ref bean="bookManager" />
+		</property>
+		<property name="userManager">
+			<ref bean="userManager" />
+		</property>
+		<property name="mailSender">
+			<ref bean="mailSender" />
+		</property>
+		<property name="managerReminderMessage">
+			<ref bean="managerReminderMessage" />
+		</property>
+	</bean>
+	<!-- Spring job scheduling -->
+	<bean id="remindUserEmailJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="reminderEmail" />
+		<property name="targetMethod" value="sendMail" />
+	</bean>
+	<bean id="remindManagerEmailJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="managerEmail" />
+		<property name="targetMethod" value="sendMail" />
+	</bean>
+	<bean id="remindManagerEmailJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="remindManagerEmailJobDetail" />
+		<property name="cronExpression" value="0 0 12 ? * 2" />
+	</bean>
+	<bean id="remindUserEmailJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="remindUserEmailJobDetail" />
+		<property name="cronExpression" value="0 0 12 ? * 2" />
+	</bean>
+	<bean
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="remindUserEmailJobTrigger" />
+				<ref bean="remindManagerEmailJobTrigger" />
+			</list>
+		</property>
+	</bean>
+	<!-- Spring JMX support -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>messages</value>
+			</list>
+		</property>
+	</bean>
+	<!-- Resource Bundle -->
+</beans>

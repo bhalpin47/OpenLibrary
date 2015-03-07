@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Mar 28, 2012 6:11:48 AM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.openlibrary.domain.Book" table="BOOK">
+        <id name="bookId" type="int">
+            <column name="BOOKID" />
+            <generator class="assigned" />
+        </id>
+        <property name="isbn" type="java.lang.String">
+            <column name="ISBN" />
+        </property>
+        <property name="title" type="java.lang.String">
+            <column name="TITLE" />
+        </property>
+        <property name="author" type="java.lang.String">
+            <column name="AUTHOR" />
+        </property>
+        <property name="publisher" type="java.lang.String">
+            <column name="PUBLISHER" />
+        </property>
+        <property name="edition" type="int">
+            <column name="EDITION" />
+        </property>
+        <property name="pages" type="int">
+            <column name="PAGES" />
+        </property>
+        <list name="series" inverse="false" table="BOOK" lazy="true">
+            <key>
+                <column name="BOOKID" />
+            </key>
+            <list-index></list-index>
+            <one-to-many class="com.openlibrary.domain.Book" />
+        </list>
+        <property name="description" type="java.lang.String">
+            <column name="DESCRIPTION" />
+        </property>
+        <list name="reviews" inverse="false" table="REVIEW" lazy="true">
+            <key>
+                <column name="BOOKID" />
+            </key>
+            <list-index></list-index>
+            <one-to-many class="com.openlibrary.domain.Review" />
+        </list>
+        <many-to-one name="user"  column="USER" class="com.openlibrary.domain.User"  fetch="join" access="property"  unique="true" lazy="false" not-null="true"/>
+        <property name="statusCode" type="java.lang.String">
+            <column name="STATUSCODE" />
+        </property>
+    </class>
+</hibernate-mapping>
